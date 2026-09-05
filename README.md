@@ -6,7 +6,7 @@ behind one key.
 
 ```xml
 <dependency>
-  <groupId>org.ironeye</groupId>
+  <groupId>io.github.directsoftworks</groupId>
   <artifactId>ironeye</artifactId>
   <version>1.0.0</version>
 </dependency>

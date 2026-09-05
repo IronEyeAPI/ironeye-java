@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.ironeye</groupId>
+  <groupId>io.github.directsoftworks</groupId>
   <artifactId>ironeye</artifactId>
   <version>1.0.0</version>
   <packaging>jar</packaging>
@@ -26,9 +26,19 @@
     </license>
   </licenses>
 
+  <developers>
+    <developer>
+      <name>Direct Softworks</name>
+      <organization>Direct Softworks</organization>
+      <organizationUrl>https://ironeye.org</organizationUrl>
+    </developer>
+  </developers>
+
   <scm>
     <url>https://github.com/IronEyeAPI/ironeye-java</url>
     <connection>scm:git:https://github.com/IronEyeAPI/ironeye-java.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/IronEyeAPI/ironeye-java.git</developerConnection>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
@@ -44,4 +54,78 @@
       <version>2.18.2</version>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <!-- Everything Maven Central refuses a bundle without: sources, javadoc,
+         and a detached PGP signature over each of them. None of it is wanted
+         for a local build, which is why it is a profile rather than the
+         default. `mvn -Prelease deploy` is what the release workflow runs. -->
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.4.0</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals><goal>jar-no-fork</goal></goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.12.0</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals><goal>jar</goal></goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>3.2.8</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals><goal>sign</goal></goals>
+                <configuration>
+                  <!-- The passphrase arrives as MAVEN_GPG_PASSPHRASE. Without
+                       this, gpg tries to open a pinentry prompt on a runner
+                       that has no terminal, and hangs until the job times
+                       out. -->
+                  <gpgArguments>
+                    <arg>--pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>0.11.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <!-- Matches the <server> id the workflow writes into
+                   settings.xml from the portal token. -->
+              <publishingServerId>central</publishingServerId>
+              <autoPublish>true</autoPublish>
+              <waitUntil>published</waitUntil>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
